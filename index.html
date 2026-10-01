@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pablo Hernández Stage Manager</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,500;6..96,700&family=Hanken+Grotesk:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: sticky name column on the left, running cue-sheet of productions on the right; stacks on phones. */
+:root{
+  --bg:#f2f3f6; --card:#ffffff; --fg:#14161f; --muted:#555b6e; --line:#d4d7e0; --accent:#a3203a; --accent-fg:#ffffff; --tag:#e8eaf0;
+  --display:"Bodoni Moda","Didot","Times New Roman",serif;
+  --body:"Hanken Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1017;--card:#171a24;--fg:#e8e9ef;--muted:#a0a6b8;--line:#2a2e3c;--accent:#e36a82;--accent-fg:#0e1017;--tag:#232735;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e1017;--card:#171a24;--fg:#e8e9ef;--muted:#a0a6b8;--line:#2a2e3c;--accent:#e36a82;--accent-fg:#0e1017;--tag:#232735;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.6}
+a{color:var(--accent);text-underline-offset:3px}
+a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.wrap{max-width:1120px;margin-inline:auto;padding-inline:20px;padding-block:28px 64px;display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:56px}
+@media(max-width:820px){.wrap{grid-template-columns:minmax(0,1fr);gap:32px}}
+aside{align-self:start;position:sticky;top:calc(env(safe-area-inset-top,0px) + 24px);display:flex;flex-direction:column;gap:20px;min-width:0}
+@media(max-width:820px){aside{position:static}}
+.eyebrow{font:500 12px/1.4 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(2.6rem,7vw,3.6rem);line-height:1;margin:0;letter-spacing:-.01em;text-wrap:balance}
+.role{font-size:1.05rem;color:var(--muted);margin:0}
+nav{display:flex;gap:8px;flex-wrap:wrap}
+nav a{font:500 13px var(--mono);letter-spacing:.04em;text-decoration:none;color:var(--fg);border:1px solid var(--line);padding:8px 12px;border-radius:3px}
+nav a[aria-current="page"]{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.contact{display:flex;flex-direction:column;gap:6px;font-size:.95rem;margin:0;padding:0;list-style:none}
+.contact span{font:500 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:block}
+.copy{font:500 12px var(--mono);background:none;border:1px solid var(--line);color:var(--fg);padding:3px 8px;border-radius:3px;cursor:pointer;margin-left:6px}
+main{min-width:0}
+h2{font-family:var(--display);font-weight:500;font-size:1.7rem;margin:0 0 16px;line-height:1.15;text-wrap:balance}
+section{margin-bottom:56px}
+.lead{font-size:1.15rem;max-width:62ch}
+p{max-width:65ch}
+.note{font-size:.9rem;color:var(--muted)}
+.tl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.tl li{display:grid;grid-template-columns:130px minmax(0,1fr);gap:20px;padding-block:16px;border-top:1px solid var(--line)}
+@media(max-width:560px){.tl li{grid-template-columns:minmax(0,1fr);gap:4px}}
+.tl .when{font:500 13px var(--mono);color:var(--muted);padding-top:3px}
+.tl b{display:block;font-weight:600}
+.tl p{margin:4px 0 0;color:var(--muted)}
+.prod{background:var(--card);border:1px solid var(--line);border-radius:4px;padding:20px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.prods{display:flex;flex-direction:column;gap:16px}
+.prod h3{margin:0;font-family:var(--display);font-weight:500;font-size:1.35rem;line-height:1.2}
+.meta{font:400 12.5px var(--mono);color:var(--muted);margin:0}
+.press{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px;border-top:1px dashed var(--line);padding-top:12px}
+.press li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:baseline}
+.tag{font:500 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;background:var(--tag);color:var(--fg);padding:2px 7px;border-radius:2px;white-space:nowrap}
+.tag.crit{background:var(--accent);color:var(--accent-fg)}
+.press p{margin:0;font-size:.95rem}
+.press .src{display:block;font:400 12px var(--mono);color:var(--muted)}
+.none{font-size:.9rem;color:var(--muted);margin:0;border-top:1px dashed var(--line);padding-top:12px}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.box{border:1px solid var(--line);background:var(--card);padding:18px;border-radius:4px}
+.box h3{margin:0 0 6px;font:600 1rem var(--body)}
+.box p{margin:0;color:var(--muted);font-size:.95rem}
+.sourcesnote{border-left:3px solid var(--line);padding-left:14px;color:var(--muted);font-size:.9rem;max-width:65ch}
+[data-view]{display:block}
+.reel{display:flex;justify-content:center;border-radius:4px;background:#000;border:1px solid var(--line);overflow:hidden}
+.reel video{display:block;width:auto;max-width:100%;max-height:min(78vh,720px);aspect-ratio:9/16;background:#000}
+.reelnote{margin:8px 0 0}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <aside>
+    <div class="eyebrow">Buenos Aires</div>
+    <h1>Pablo Hernández</h1>
+    <p class="role" id="role">Stage Manager del Ballet Estable del Teatro Colón. Productor técnico.</p>
+    <nav aria-label="Secciones">
+      <a href="#stage" id="nav-stage" aria-current="page">Stage Manager</a>
+      <a href="#maestro" id="nav-maestro">Maestro de técnica</a>
+    </nav>
+    <ul class="contact">
+      <li><span>Instagram</span><a href="https://www.instagram.com/pablogher/">@pablogher</a></li>
+      <li><span>LinkedIn</span><a href="https://ar.linkedin.com/in/pablogher">linkedin.com/in/pablogher</a></li>
+      <li><span>Correo</span><span style="text-transform:none;letter-spacing:0;font:400 .95rem var(--body);color:var(--fg)" id="mail">pablogher@hotmail.com</span><button class="copy" id="copy" type="button">Copiar</button></li>
+    </ul>
+  </aside>
+
+  <main>
+  <!-- STAGE MANAGER -->
+  <div data-view="stage" id="view-stage">
+    <section aria-label="Video de presentación">
+      <div class="reel">
+        <video controls autoplay muted playsinline preload="auto" poster="poster.jpg" aria-label="Video de presentación de Pablo Hernández">
+          <source src="presentacion.mp4" type="video/mp4">
+        </video>
+      </div>
+      <p class="note reelnote">Se reproduce sin sonido: tocá el ícono de volumen para activarlo. <a href="https://drive.google.com/file/d/1VJQ5R9QsDxTFb7-3Q7cr8Swr_hCHtw7e/view?usp=drivesdk" target="_blank" rel="noopener">Ver en Drive</a></p>
+    </section>
+    <section>
+      <div class="eyebrow">Presentación</div>
+      <p class="lead">Bailarín clásico de formación, hoy trabajo como Stage Manager de ballet y productor técnico. Me formé en el Teatro Colón y en el American Ballet Theatre de Nueva York, y pasé por producciones públicas y privadas: el Ballet Contemporáneo del Teatro San Martín, el Colón, el circuito comercial porteño y giras por el interior de Argentina y otros países.</p>
+      <p>Traduzco el lenguaje coreográfico a necesidades de escena. Haber bailado me da una idea concreta de lo que significa exponerse en el escenario. Hago de puente entre artistas, técnicos y productores para que cada función se sostenga sobre variables técnicas ya verificadas.</p>
+    </section>
+
+    <section>
+      <h2>Trayectoria</h2>
+      <ul class="tl">
+        <li><span class="when">Oct 2025 – hoy</span><div><b>Stage Manager, Ballet Estable del Teatro Colón</b><p>Onegin, El cascanueces, El lago de los cisnes, programa mixto, Alicia en el país de las maravillas y Principio de éxtasis.</p></div></li>
+        <li><span class="when">2016 – 2023</span><div><b>Stage Manager, Ballet Contemporáneo del Teatro San Martín</b><p>Como SM principal, además de conducir las funciones coordiné la producción técnica de cada temporada. Gala en honor a la Familia Real de los Países Bajos, Teatro Diligentia, La Haya, abril de 2017.</p></div></li>
+        <li><span class="when">Teatro Colón</span><div><b>Coordinador de producción técnica, Ballet Estable</b><p>Bajo la dirección de Paloma Herrera y la Dirección General de Producción Artística. La bella durmiente, El cascanueces, Noche clásica y contemporánea, y giras por el país.</p></div></li>
+        <li><span class="when">2017 – 2019</span><div><b>Director técnico de ballet, Maipo (Lino Patalano)</b><p>Coordinación de giras del Ballet Nacional del Sodre (Julio Bocca), Letter to a Man (Bob Wilson y Mikhail Baryshnikov) y el Ballet Nacional de España en el Teatro Coliseo.</p></div></li>
+        <li><span class="when">2013 – 2019</span><div><b>Grupo ARS</b><p>Productora de la Gala Internacional de Buenos Aires. Asistente de producción, director técnico, stage manager y coordinador de producción técnica según el proyecto. Incluye Una velada con John Malkovich y la gira de Grupo Corpo en el Coliseo.</p></div></li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Producciones y prensa</h2>
+      <p class="sourcesnote">Cada nota enlaza al medio original. Cada una está marcada como crítica, nota, previa o cobertura.</p>
+      <div class="prods" style="margin-top:20px">
+
+        <article class="prod">
+          <div><h3>Onegin</h3><p class="meta">John Cranko · Ballet Estable del Teatro Colón · octubre de 2025</p></div>
+          <ul class="press">
+            <li><span class="tag crit">Crítica</span><p>Néstor Tirri califica la puesta de excelente. Destaca la supervisión de repositores del linaje de Cranko, la expresividad de la pareja protagónica y el liderazgo de Julio Bocca sobre la compañía.<span class="src"><a href="https://www.lanacion.com.ar/espectaculos/danza/onegin-un-poderoso-drama-danzado-que-roza-lo-sublime-nid04102025/">La Nación, 4/10/2025</a></span></p></li>
+            <li><span class="tag">Cobertura</span><p>El regreso de Marianela Núñez al Colón con este título.<span class="src"><a href="https://www.infobae.com/cultura/2025/10/11/marianela-nunez-deslumbro-en-su-esperado-regreso-al-teatro-colon-para-protagonizar-onegin/">Infobae, 11/10/2025</a></span></p></li>
+          </ul>
+        </article>
+
+        <article class="prod">
+          <div><h3>El cascanueces</h3><p class="meta">Versión de Silvia Bazilis · diciembre de 2025</p></div>
+          <ul class="press">
+            <li><span class="tag crit">Crítica</span><p>Constanza Bertolini califica con "Muy bueno" la nueva versión que cierra la primera temporada de Julio Bocca al frente del Estable. Destaca el desempeño de la compañía, los solistas y, en particular, al bailarín invitado Lucas Erni.<span class="src"><a href="https://www.lanacion.com.ar/espectaculos/danza/un-cascanueces-que-realza-la-fantasia-de-la-navidad-desde-la-mirada-inocente-de-una-nina-cierra-el-nid13122025/">La Nación, 13/12/2025</a></span></p></li>
+            <li><span class="tag">Nota</span><p>Tradición y fantasía navideña en el Ballet Estable del Teatro Colón.<span class="src"><a href="https://balletindance.com/2025/12/18/el-cascanueces-tradicion-y-fantasia-navidena-en-el-ballet-estable-del-teatro-colon/">Balletin Dance, 18/12/2025</a></span></p></li>
+            <li><span class="tag">Previa</span><p>Laura Chertkoff recoge la idea de Silvia Bazilis: un Cascanueces pensado desde los ojos del niño que todos llevamos dentro.<span class="src"><a href="https://www.lanacion.com.ar/espectaculos/danza/no-es-fin-de-ano-si-no-hay-cascanueces-el-ballet-estable-y-los-estudiantes-del-colon-encarnan-la-nid11122025/">La Nación, 11/12/2025</a></span></p></li>
+            <li><span class="tag">Cobertura</span><p>El Estable despide la temporada 2025 con El cascanueces y un homenaje a Julio Bocca.<span class="src"><a href="https://www.infobae.com/cultura/2025/11/29/el-ballet-estable-del-teatro-colon-despide-la-temporada-2025-con-el-cascanueces-y-un-homenaje-a-julio-bocca/">Infobae, 29/11/2025</a></span></p></li>
+            <li><span class="tag crit">Crítica</span><p>La reseña la describe como una producción festiva y pensada para el público familiar.<span class="src"><a href="https://bachtrack.com/dance-event/the-nutcracker--ballet-estable-del-teatro-colon-ballet-estable-del-teatro-colon-teatro-colon-12-december-2025/432593">Bachtrack, 12/12/2025</a></span></p></li>
+          </ul>
+        </article>
+
+        <article class="prod">
+          <div><h3>El lago de los cisnes</h3><p class="meta">Coreografía de Raúl Candal según Petipa e Ivanov · marzo de 2026</p></div>
+          <ul class="press">
+            <li><span class="tag">Nota</span><p>Un recorrido por lo que no se ve del ballet, del otro lado del telón del Colón.<span class="src"><a href="https://www.lanacion.com.ar/espectaculos/danza/detras-de-el-lago-de-los-cisnes-lo-que-no-se-ve-del-ballet-mas-iconico-de-la-historia-nid11032026/">La Nación, 11/3/2026</a></span></p></li>
+          </ul>
+        </article>
+
+        <article class="prod">
+          <div><h3>Programa mixto: Aftermath, Come In, La consagración de la primavera</h3><p class="meta">Demis Volpi · Aszure Barton · Oscar Araiz · mayo de 2026</p></div>
+          <ul class="press">
+            <li><span class="tag">Nota</span><p>Constanza Bertolini sobre el regreso al Colón de La consagración de la primavera de Araiz, estrenada en 1966.<span class="src"><a href="https://www.lanacion.com.ar/espectaculos/danza/la-consagracion-de-la-primavera-de-oscar-araiz-una-obra-sin-tiempo-sobre-un-tema-sin-tiempo-la-nid02052026/">La Nación, 2/5/2026</a></span></p></li>
+          </ul>
+        </article>
+
+        <article class="prod">
+          <div><h3>Alicia en el país de las maravillas</h3><p class="meta">Christopher Wheeldon · Joby Talbot · estreno argentino, julio de 2026</p></div>
+          <ul class="press">
+            <li><span class="tag">Previa</span><p>Presentación a la prensa de la producción del Ballet Real Danés y el Ballet Real Sueco.<span class="src"><a href="https://www.perfil.com/noticias/cultura/alicia-en-el-pais-de-las-maravillas-llega-al-colon-una-superproduccion-que-llega-por-primera-vez-a-la-argentina-a42.phtml">Perfil, julio de 2026</a></span></p></li>
+          </ul>
+        </article>
+
+        <article class="prod">
+          <div><h3>Principio de éxtasis</h3><p class="meta">Goyo Montero · música de Gustavo Santaolalla · inspirado en El Aleph · estreno mundial, septiembre de 2026</p></div>
+          <ul class="press">
+            <li><span class="tag crit">Crítica</span><p>Néstor Tirri la titula "Exultante" y la define como un trabajo encomiable que multiplica el talento de un equipo creativo rendido ante el universo de Borges.<span class="src"><a href="https://www.lanacion.com.ar/espectaculos/danza/exultante-principio-de-extasis-un-encomiable-trabajo-que-multiplica-el-talento-de-un-equipo-creativo-nid11092026/">La Nación, 11/9/2026</a></span></p></li>
+            <li><span class="tag">Cobertura</span><p>El estreno en el Colón ante unos tres mil espectadores, con entrevistas al elenco y al equipo creativo.<span class="src"><a href="https://noticias.perfil.com/noticias/cultura/el-aleph-de-borges-se-baila-el-teatro-colon.phtml">Perfil, 11/9/2026</a></span></p></li>
+            <li><span class="tag">Previa</span><p>Laura Chertkoff sobre el imaginario de Borges en escena.<span class="src"><a href="https://www.lanacion.com.ar/espectaculos/danza/principio-de-extasis-el-imaginario-de-borges-en-el-escenario-del-teatro-colon-nid31082026/">La Nación, 31/8/2026</a></span></p></li>
+          </ul>
+        </article>
+
+        <article class="prod">
+          <div><h3>Manon</h3><p class="meta">Kenneth MacMillan · cierre de la temporada 2026 · en preparación</p></div>
+          
+        </article>
+
+        <article class="prod">
+          <div><h3>Letter to a Man</h3><p class="meta">Robert Wilson · Mikhail Baryshnikov · Teatro Coliseo · producción técnica y asistencia de SM</p></div>
+          <ul class="press">
+            <li><span class="tag crit">Crítica</span><p>El Buenos Aires Times, del grupo Perfil, describe el viaje de Baryshnikov por el diario de Nijinsky y el trabajo de luces de Wilson.<span class="src"><a href="https://www.batimes.com.ar/news/culture/baryshnikov-brings-to-light-nijinskys-descent-into-darkness.phtml">Buenos Aires Times, 9/9/2017</a></span></p></li>
+          </ul>
+        </article>
+      </div>
+      <p class="note" style="margin-top:20px">También trabajé en las giras del Ballet Nacional del Sodre dirigido por Julio Bocca (2017 y 2018), con Grupo Corpo y en Una velada con John Malkovich.</p>
+    </section>
+
+    <section>
+      <h2>Con quién trabajé</h2>
+      <p>Julio Bocca, Paloma Herrera, Mauricio Wainrot, Ana María Stekelman, Mikhail Baryshnikov, Robert Wilson, Mauro Bigonzetti, Maria Kochetkova, Lino Patalano, Andrea Chinetti, Diego Poblete, Augusto Techera, Daniela Cercchiaro, Enrique Arturo Diemecke, Aleth Francillon, Grupo Ars S.R.L, Goyo Montero, Demis Volpi, Oscar Araiz y Aszure Barton.</p>
+      <p><a href="#maestro">Ver mi perfil como Maestro de técnica de danza clásica</a></p>
+    </section>
+  </div>
+
+  <!-- MAESTRO -->
+  <div data-view="maestro" id="view-maestro" hidden>
+    <section>
+      <div class="eyebrow">Docencia</div>
+      <h2 style="font-size:2.2rem">Maestro de técnica de danza clásica</h2>
+      <p class="lead">Fui bailarín clásico y soy profesor de danza con certificación del American Ballet Theatre de Nueva York. Enseño técnica desde el cuerpo y desde el oficio de escena que conozco hoy como Stage Manager del Ballet Estable del Teatro Colón.</p>
+    </section>
+    <section>
+      <div class="cols">
+        <div class="box"><h3>Formación</h3><p>Teatro Colón y American Ballet Theatre, certificado del National Training Curriculum. El programa combina principios de las escuelas francesa, italiana y rusa y pone el foco en coordinación y alineación.</p></div>
+        <div class="box"><h3>Experiencia docente</h3><p>Enseñé Historia de la danza en el Instituto Superior de Arte del Teatro Colón.</p></div>
+        <div class="box"><h3>Para estudios</h3><p>Disponibilidad horaria a convenir, clase de prueba y programa del ABT National Training Curriculum a disposición de la institución.</p></div>
+      </div>
+    </section>
+    <section>
+      <h2>Contacto</h2>
+      <p>Escribime por correo a <strong>pablogher@hotmail.com</strong> o por <a href="https://www.instagram.com/pablogher/">Instagram</a>.</p>
+      <p><a href="#stage">Volver a mi trabajo como Stage Manager</a></p>
+    </section>
+  </div>
+  </main>
+</div>
+
+<script>
+(function(){
+  var sv=document.getElementById('view-stage'),mv=document.getElementById('view-maestro');
+  var ns=document.getElementById('nav-stage'),nm=document.getElementById('nav-maestro');
+  var role=document.getElementById('role');
+  function show(){
+    var m=location.hash==='#maestro';
+    sv.hidden=m;mv.hidden=!m;
+    ns.setAttribute('aria-current',m?'false':'page');
+    nm.setAttribute('aria-current',m?'page':'false');
+    role.textContent=m?'Maestro de técnica de danza clásica. Certificación ABT.':'Stage Manager del Ballet Estable del Teatro Colón. Productor técnico.';
+    window.scrollTo(0,0);
+  }
+  window.addEventListener('hashchange',show);show();
+  var b=document.getElementById('copy');
+  b.addEventListener('click',function(){
+    var t='pablogher@hotmail.com';
+    function sel(){var r=document.createRange();r.selectNodeContents(document.getElementById('mail'));var s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent='Seleccionado'}
+    try{navigator.clipboard.writeText(t).then(function(){b.textContent='Copiado'},sel)}catch(e){sel()}
+  });
+})();
+</script>
+
+</body>
+</html>
